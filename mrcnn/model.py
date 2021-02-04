@@ -948,7 +948,14 @@ def fpn_classifier_graph(rois, feature_maps, image_meta,
                            name='mrcnn_bbox_fc')(shared)
     # Reshape to [batch, num_rois, NUM_CLASSES, (dy, dx, log(dh), log(dw))]
     s = K.int_shape(x)
-    mrcnn_bbox = KL.Reshape((s[1], num_classes, 4), name="mrcnn_bbox")(x)
+    
+    #mrcnn_bbox = KL.Reshape((s[1], num_classes, 4), name="mrcnn_bbox")(x)
+    if s[1]==None:
+        mrcnn_bbox = layers.Reshape((-1, num_classes, 4), name="mrcnn_bbox")(x)
+    else:
+        mrcnn_bbox = layers.Reshape((s[1], num_classes, 4), name="mrcnn_bbox")(x)
+
+    indices = tf.stack([tf.range(tf.shape(probs)[0]), class_ids], axis = 1)
 
     return mrcnn_class_logits, mrcnn_probs, mrcnn_bbox
 
